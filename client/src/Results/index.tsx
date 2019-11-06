@@ -19,6 +19,8 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import Divider from '@material-ui/core/Divider';
 import StarIcon from '@material-ui/icons/Star';
+import PersonIcon from '@material-ui/icons/Person';
+import Chip from '@material-ui/core/Chip';
 
 import { searchRepositories, searchNextRepositories, searchPrevRepositories } from '../actions';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -34,6 +36,9 @@ const useStyles = makeStyles((theme: Theme) =>
     content: {
       flexGrow: 1,
       padding: theme.spacing(3),
+    },
+    chip: {
+      margin: theme.spacing(0, 1, 1, 0)
     },
     search: {
       position: 'relative',
@@ -75,11 +80,14 @@ const useStyles = makeStyles((theme: Theme) =>
       display: 'flex',
       flexDirection: 'column',
     },
+    listItemAvatar: {
+      marginTop: '0px'
+    },
     paperRoot: {
       display: 'flex',
       flexDirection: 'column',
       overflowY: 'auto',
-      height: '700px'
+      height: '540px'
     },
     searchBoxInput: {
       backgroundColor: theme.palette.common.white,
@@ -106,6 +114,12 @@ const useStyles = makeStyles((theme: Theme) =>
       flexDirection: 'row',
       alignItems: 'center'
     },
+    repositoryTopicDetails: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      flexDirection: 'row',
+      alignItems: 'center'
+    },
     toolbar: theme.mixins.toolbar,
     visuallyHidden: {
       border: 0,
@@ -129,42 +143,6 @@ type SortDirection =
 type SortOrder =
   "best+match" |
   "stars";
-
-interface IColumn {
-  id: "full_name" | "owner.login" | "description" | "score" | "stargazers_count" | "language";
-  label: string;
-  minWidth?: number;
-  align?: 'right';
-  format?: (value: any) => string;
-};
-
-const columns: IColumn[] = [
-  { id: 'full_name', label: 'Name', minWidth: 170 },
-  { id: 'owner.login', label: 'Owner', minWidth: 100 },
-  { 
-    id: 'description', 
-    label: 'Description',
-    format: (value :string) => {
-      if(value && value.length > 100) {
-          return value.substring(0, 100).concat('...')
-      }
-      return value;
-    },
-    minWidth: 600
-  },
-  { id: 'score', label: 'Relevancy', minWidth: 50 },
-  { id: 'stargazers_count', 
-    label: 'Stars',
-    format: (value :string) => {
-      const converted :number = parseInt(value, 10);
-      if(converted > 1000) {
-          return `${(converted / 1000).toFixed(1)}k`;
-      }
-      return value;
-    }, 
-    minWidth: 50 },
-  { id: 'language', label: 'Relevancy', minWidth: 50 },
-];
 
 interface IComponentProps extends RouteComponentProps {
   repositories: any,
@@ -215,6 +193,9 @@ function Results(props: IComponentProps) {
   };
 
   const onSearchClick = () => {
+    setOrderBy("best+match");
+    setSortDir("desc");
+    setPage(0);
     props.history.push(`/search?q=${query}`);
   }
 
@@ -286,20 +267,25 @@ function Results(props: IComponentProps) {
             <List className={classes.listRoot}>
               {
                 Object.values(props.repositories).sort(sortItems).slice(page * pageSize, pageEndIndex).map((row :any, index :number) => {
+                  let stars :string = '';
+                  const converted :number = parseInt(row.stargazers_count, 10);
                   
-                  const starColumn  = columns[4];
-                  const stars = starColumn.format ? starColumn.format(row[starColumn.id]) : row[starColumn.id];
+                  if(converted > 1000) {
+                    stars = `${(converted / 1000).toFixed(1)}k`;
+                  } else {
+                    stars = converted.toString();
+                  }
 
                   return (
                     <>
                       <ListItem key={row.id} alignItems="flex-start">
-                        <ListItemAvatar>
+                        <ListItemAvatar className={classes.listItemAvatar}>
                           <Avatar className={classes.avatar}>
                             <BookIcon />
                           </Avatar>
                         </ListItemAvatar>
                         <ListItemText
-                          primary={row[columns[0].id]}
+                          primary={row.full_name}
                           secondaryTypographyProps={{
                             "component": "div"
                           }}
@@ -309,16 +295,30 @@ function Results(props: IComponentProps) {
                                 component="div"
                                 variant="body2"
                                 color="textPrimary">
-                                {row[columns[2].id]}
+                                {row.description}
                               </Typography>
+                              <div className={classes.repositoryTopicDetails}>
+                                {
+                                  row.topics.map((e :string, i :number) => {
+                                    return (
+                                      <Chip className={classes.chip} key={i} label={e} />
+                                    )
+                                  })
+                                }
+                              </div>
                               <div className={classes.repositoryDetails}>
                                 <div className={classes.repositoryDetails}>
                                   <StarIcon fontSize="small" />
-                                  &nbsp;&nbsp;{stars}
+                                  &nbsp;{stars}
                                 </div>
                                 &nbsp;&nbsp;
                                 <div className={classes.repositoryDetails}>
-                                  {row[columns[5].id]}
+                                  {row.language}
+                                </div>
+                                &nbsp;&nbsp;
+                                <div className={classes.repositoryDetails}>
+                                  <PersonIcon fontSize="small" />
+                                  &nbsp;&nbsp;{row.owner.login}
                                 </div>
                               </div>
                             </div>
