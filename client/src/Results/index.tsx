@@ -28,6 +28,7 @@ import Chip from '@material-ui/core/Chip';
 import IconButton from '@material-ui/core/IconButton';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { searchRepositories, searchNextRepositories, searchPrevRepositories } from '../actions';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -122,6 +123,9 @@ const useStyles = makeStyles((theme: Theme) =>
       color: theme.palette.text.secondary,
       borderRadius: '30px'
     },
+    spinnerContainer: {
+      height: '100%'
+    },
     tableWrapper: {
       overflow: 'auto',
     },
@@ -163,6 +167,7 @@ interface IComponentProps extends RouteComponentProps {
   repositories: any,
   pages: number,
   total: number,
+  loading: boolean,
   searchRepositories: (query :string, sort :string, order :string) => void,
   searchNextRepositories: (query :string, sort :string, order :string, page :number) => void,
   searchPrevRepositories: (query :string, sort :string, order :string, page :number) => void
@@ -290,6 +295,7 @@ function Results(props: IComponentProps) {
           </Grid>
         </Box>
         <Paper className={classes.paperRoot}>
+          {!props.loading && 
             <List className={classes.listRoot}>
               {
                 Object.values(props.repositories).sort(sortItems).slice(page * pageSize, pageEndIndex).map((row :any, index :number) => {
@@ -358,7 +364,12 @@ function Results(props: IComponentProps) {
                   )
                 })
               }
-            </List>
+            </List>}
+            {props.loading &&
+              <Grid className={classes.spinnerContainer} container alignItems="center" justify="center">
+                <CircularProgress size={140} />
+              </Grid>
+            }
         </Paper>
         <TablePagination
           component="div"
@@ -382,6 +393,7 @@ const mapStateToProps = (state: any) => {
   const total = state.repositories.count;
   return {
       total,
+      loading: state.repositories.loading,
       pages: Math.trunc(total / pageSize),
       repositories: state.repositories.items
   }

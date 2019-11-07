@@ -15,6 +15,7 @@
 * Typescript
 * Material-UI
 * Redux
+* Redis
 * React-Router
 * Thunk
 * Axios
