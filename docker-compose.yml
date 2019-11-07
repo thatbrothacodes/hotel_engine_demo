@@ -1,0 +1,26 @@
+version: "3"
+
+services:
+  redis:
+    container_name: DEMO-HOTEL_ENGINE-CACHEDB
+    image: redis:5-alpine
+    expose: 
+      - 6379
+  DEMO-HOTEL-ENGINE-SERVER:
+    build: ./server
+    container_name: demo-hotel-engine-server
+    links:
+      - redis
+    environment:
+      - NODE_ENV=production
+    image: demo-hotel-engine-server:0.1.0
+    ports:
+      - "4000:4000"
+  DEMO-HOTEL-ENGINE-CLIENT:
+    build: ./client
+    container_name: demo-hotel-engine-client
+    depends_on:
+      - DEMO-HOTEL-ENGINE-SERVER
+    image: demo-hotel-engine-client:0.1.0
+    ports:
+      - "3000:3000"

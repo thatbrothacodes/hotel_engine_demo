@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const client = redis.createClient({
     port: 6379,
-    host: 'localhost'
+    host: (process.env.NODE_ENV) ? 'redis' : 'localhost'
 });
 
 export default (req, res, next) => {
