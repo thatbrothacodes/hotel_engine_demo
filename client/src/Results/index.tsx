@@ -1,10 +1,13 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
+import { Link } from "react-router-dom";
 
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
+import InputBase from '@material-ui/core/InputBase';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import SearchIcon from '@material-ui/icons/Search';
@@ -20,7 +23,11 @@ import Avatar from '@material-ui/core/Avatar';
 import Divider from '@material-ui/core/Divider';
 import StarIcon from '@material-ui/icons/Star';
 import PersonIcon from '@material-ui/icons/Person';
+import SubtitlesIcon from '@material-ui/icons/Subtitles';
 import Chip from '@material-ui/core/Chip';
+import IconButton from '@material-ui/core/IconButton';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
 
 import { searchRepositories, searchNextRepositories, searchPrevRepositories } from '../actions';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -39,6 +46,14 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     chip: {
       margin: theme.spacing(0, 1, 1, 0)
+    },
+    formControl: {
+      margin: theme.spacing(1),
+      minWidth: 120,
+    },
+    headerLink: {
+      textDecoration: 'none',
+      color: '#ffffff'
     },
     search: {
       position: 'relative',
@@ -87,7 +102,8 @@ const useStyles = makeStyles((theme: Theme) =>
       display: 'flex',
       flexDirection: 'column',
       overflowY: 'auto',
-      height: '540px'
+      height: '460px',
+      marginTop: '20px'
     },
     searchBoxInput: {
       backgroundColor: theme.palette.common.white,
@@ -139,7 +155,6 @@ type SortDirection =
   "desc" |
   "asc";
 
-
 type SortOrder =
   "best+match" |
   "stars";
@@ -171,25 +186,15 @@ function Results(props: IComponentProps) {
     props.searchRepositories(queryString, orderBy, sortDir);
   },[props.location]);
 
-  const handleChangeSort = (property: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
-    let direction :SortDirection = "desc";
-    let sortOrder :SortOrder =  "best+match";
+  const handleChangeSort = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selected :string[] = event.target.value.split(' ');
+    const field :SortOrder = selected[0] as SortOrder;
+    const direction :SortDirection = selected[1] as SortDirection;
 
-    if(property === "stargazers_count") {
-      sortOrder = "stars";
-    } else {
-      sortOrder = "best+match";
-    }
+    setOrderBy(field);
+    setSortDir(direction);
 
-    if(sortOrder === orderBy) {
-      direction = (sortDir === "desc") ? "asc" : "desc";
-      setSortDir(direction);
-    } else {
-      setSortDir("desc");
-      setOrderBy(sortOrder);
-    }
-
-    props.searchRepositories(query, sortOrder, direction);
+    props.searchRepositories(query, field, direction);
   };
 
   const onSearchClick = () => {
@@ -200,8 +205,7 @@ function Results(props: IComponentProps) {
   }
 
   const handleChangePage = (event: React.MouseEvent<HTMLButtonElement>, newPage: number) => {
-    const apiPage = newPage + 1;  
-    handleChangeSort("best+match");
+    const apiPage = newPage + 1;
 
     setPage(newPage);
 
@@ -216,6 +220,12 @@ function Results(props: IComponentProps) {
   const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value);
   };
+
+  const handleQueryEnter = (event :React.KeyboardEvent) => {
+    if(event.key.toLowerCase() === 'enter') {
+      onSearchClick();
+    }
+  }
 
   const sortItems = (a :any, b :any) => {
     let sortOrder = "";
@@ -239,30 +249,45 @@ function Results(props: IComponentProps) {
       <AppBar position="fixed" className={classes.appBar}>
         <Toolbar>
           <Typography variant="h6" noWrap>
-            Hotel Engine Demo
+            <Link className={classes.headerLink} to="/">Hotel Engine Demo</Link>
           </Typography>
           <div className={classes.search}>
             <Paper className={classes.searchPaper}>
-              <TextField
-                  id="input-with-icon-textfield"
-                  placeholder="Search..."
-                  onChange={handleQueryChange}
-                  value={query}
-                  fullWidth
-                  InputProps={{
-                      className: classes.searchBoxInput,
-                      endAdornment: (
-                          <InputAdornment onClick={onSearchClick} position="start">
-                              <SearchIcon />
-                          </InputAdornment>
-                      )
-                  }}/>
+              <InputBase
+                id="input-with-icon-textfield"
+                placeholder="Search..."
+                className={classes.searchBoxInput}
+                onChange={handleQueryChange}
+                value={query}
+                onKeyPress={handleQueryEnter}
+                fullWidth
+                endAdornment={
+                    <InputAdornment position="start">
+                        <IconButton disabled={query.length < 3} color="primary" onClick={onSearchClick} aria-label="search">
+                          <SearchIcon />
+                        </IconButton>
+                    </InputAdornment>
+                }/>
               </Paper>
           </div>
         </Toolbar>
       </AppBar>
       <main className={classes.content}>
         <div className={classes.toolbar} />
+        <Box>
+          <Grid container justify="flex-end">
+            <Select
+                labelId="demo-controlled-open-select-label"
+                id="demo-controlled-open-select"
+                variant="outlined"
+                value={orderBy + ' ' + sortDir}
+                onChange={handleChangeSort}>
+                <MenuItem value="best+match desc">Best Match</MenuItem>
+                <MenuItem value="stars desc">Most Stars</MenuItem>
+                <MenuItem value="stars asc">Fewest Stars</MenuItem>
+            </Select>
+          </Grid>
+        </Box>
         <Paper className={classes.paperRoot}>
             <List className={classes.listRoot}>
               {
@@ -277,8 +302,8 @@ function Results(props: IComponentProps) {
                   }
 
                   return (
-                    <>
-                      <ListItem key={row.id} alignItems="flex-start">
+                    <React.Fragment key={row.id}>
+                      <ListItem alignItems="flex-start">
                         <ListItemAvatar className={classes.listItemAvatar}>
                           <Avatar className={classes.avatar}>
                             <BookIcon />
@@ -313,7 +338,8 @@ function Results(props: IComponentProps) {
                                 </div>
                                 &nbsp;&nbsp;
                                 <div className={classes.repositoryDetails}>
-                                  {row.language}
+                                  <SubtitlesIcon fontSize="small" />
+                                  &nbsp;&nbsp;{row.language}
                                 </div>
                                 &nbsp;&nbsp;
                                 <div className={classes.repositoryDetails}>
@@ -325,27 +351,27 @@ function Results(props: IComponentProps) {
                           }/>
                       </ListItem>
                       {index !== pageEndIndex - 1 &&
-                        <Divider />
+                        <Divider key={row.full_name} />
                       }
-                    </>
+                    </React.Fragment>
                   )
                 })
               }
             </List>
         </Paper>
         <TablePagination
-                component="div"
-                count={props.total}
-                rowsPerPage={pageSize}
-                page={page}
-                rowsPerPageOptions={[]}
-                backIconButtonProps={{
-                    'aria-label': 'previous page',
-                }}
-                nextIconButtonProps={{
-                    'aria-label': 'next page',
-                }}
-                onChangePage={handleChangePage} />
+          component="div"
+          count={props.total}
+          rowsPerPage={pageSize}
+          page={page}
+          rowsPerPageOptions={[]}
+          backIconButtonProps={{
+              'aria-label': 'previous page',
+          }}
+          nextIconButtonProps={{
+              'aria-label': 'next page',
+          }}
+          onChangePage={handleChangePage} />
       </main>
     </div>
   );

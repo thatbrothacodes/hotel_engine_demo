@@ -5,8 +5,9 @@ import Grid from '@material-ui/core/Grid';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import Typography from '@material-ui/core/Typography';
 import InputAdornment from '@material-ui/core/InputAdornment';
-import TextField from '@material-ui/core/TextField';
+import InputBase from '@material-ui/core/InputBase';
 import SearchIcon from '@material-ui/icons/Search';
+import IconButton from '@material-ui/core/IconButton';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -26,12 +27,6 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         searchBoxInput: {
             backgroundColor: theme.palette.common.white,
-            '&:before': {
-                borderBottom: 'none',
-            },
-            '&:hover': {
-                borderBottom: 'none',
-            },
             marginLeft: theme.spacing(1),
             marginRight: theme.spacing(1)
         }
@@ -50,6 +45,12 @@ function Home(props: RouteComponentProps) {
         props.history.push(`/search?q=${query}`);
     }
 
+    const handleQueryEnter = (event :React.KeyboardEvent) => {
+        if(event.key.toLowerCase() === 'enter') {
+            onSearchClick();
+        }
+    }
+
     return (
         <div className={classes.root}>
             <Grid className={classes.container} justify="center" alignItems="center" container>
@@ -58,21 +59,19 @@ function Home(props: RouteComponentProps) {
                         <GitHubIcon fontSize="large" /> Repository Search
                     </Typography>
                     <Paper className={classes.paper}>
-                        <TextField
-                            id="input-with-icon-textfield"
-                            placeholder="Search..."
-                            onChange={handleChange}
+                        <InputBase
+                            className={classes.searchBoxInput}
                             value={query}
+                            onChange={handleChange}
+                            onKeyPress={handleQueryEnter}
                             fullWidth
-                            InputProps={{
-                                className: classes.searchBoxInput,
-                                endAdornment: (
-                                    <InputAdornment onClick={onSearchClick} position="start">
+                            endAdornment={
+                                <InputAdornment position="start">
+                                    <IconButton disabled={query.length < 3} color="primary" onClick={onSearchClick} aria-label="search">
                                         <SearchIcon />
-                                    </InputAdornment>
-                                )
-                            }}
-                        />
+                                    </IconButton>
+                                </InputAdornment>
+                            }/>
                     </Paper>
                 </Grid>
             </Grid>
