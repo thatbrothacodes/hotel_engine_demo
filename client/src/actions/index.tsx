@@ -17,7 +17,7 @@ import {
     RepositoryActionTypes
 } from './types';
 
-const repoSearchApiUrl :string = 'search/repositories';
+const repoSearchApiUrl :string = 'repositories';
 
 let currentQuery :string = '';
 let currentOrderBy :string = '';
@@ -119,7 +119,7 @@ export const searchPrevRepositories = (query :string, sortDir :string, orderBy :
 
 export const searchRepositories = (query :string, sortDir :string, orderBy :string) => {
     return (dispatch: Dispatch<any>) => {
-        const apiUrl = `${repoSearchApiUrl}?q=${query}&sort=${sortDir}&order=${orderBy}`;
+        const apiUrl = `${repoSearchApiUrl}?q=${query}&sort=${sortDir}&order=${orderBy}&page=1`;
 
         if(currentQuery === query && currentOrderBy === orderBy && currentSortDir === sortDir) {
             dispatch(requestSearchRepositories(query, orderBy, sortDir));

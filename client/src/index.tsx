@@ -19,8 +19,8 @@ declare global {
   }
 }
 
-axios.defaults.baseURL = "https://api.github.com";
-axios.defaults.headers.accept = 'application/vnd.github.mercy-preview+json';
+axios.defaults.baseURL = "http://localhost:4000";
+axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 const reduxDevTools = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const store = createStore(
