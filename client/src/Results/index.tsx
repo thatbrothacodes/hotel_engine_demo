@@ -193,6 +193,7 @@ function Results(props: IComponentProps) {
 
     setOrderBy(field);
     setSortDir(direction);
+    setPage(0);
 
     props.searchRepositories(query, field, direction);
   };
