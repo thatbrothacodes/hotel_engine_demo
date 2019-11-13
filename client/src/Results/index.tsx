@@ -7,12 +7,9 @@ import AppBar from '@material-ui/core/AppBar';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import InputBase from '@material-ui/core/InputBase';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import SearchIcon from '@material-ui/icons/Search';
 import Paper from '@material-ui/core/Paper';
-import InputAdornment from '@material-ui/core/InputAdornment';
 import TablePagination from '@material-ui/core/TablePagination';
 import BookIcon from '@material-ui/icons/Book';
 import List from '@material-ui/core/List';
@@ -25,10 +22,10 @@ import StarIcon from '@material-ui/icons/Star';
 import PersonIcon from '@material-ui/icons/Person';
 import SubtitlesIcon from '@material-ui/icons/Subtitles';
 import Chip from '@material-ui/core/Chip';
-import IconButton from '@material-ui/core/IconButton';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Search from '../components/Search';
 
 import { searchRepositories, searchNextRepositories, searchPrevRepositories } from '../actions';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -203,12 +200,16 @@ function Results(props: IComponentProps) {
     props.searchRepositories(query, field, direction);
   };
 
-  const onSearchClick = () => {
+  const handleSearchClick = () => {
     setOrderBy("best+match");
     setSortDir("desc");
     setPage(0);
     props.history.push(`/search?q=${query}`);
   }
+
+  const handleQueryChange = (q: string) => {
+    setQuery(q);
+  };
 
   const handleChangePage = (event: React.MouseEvent<HTMLButtonElement>, newPage: number) => {
     const apiPage = newPage + 1;
@@ -222,16 +223,6 @@ function Results(props: IComponentProps) {
     }
       
   };
-
-  const handleQueryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(event.target.value);
-  };
-
-  const handleQueryEnter = (event :React.KeyboardEvent) => {
-    if(event.key.toLowerCase() === 'enter') {
-      onSearchClick();
-    }
-  }
 
   const sortItems = (a :any, b :any) => {
     let sortOrder = "";
@@ -259,21 +250,11 @@ function Results(props: IComponentProps) {
           </Typography>
           <div className={classes.search}>
             <Paper className={classes.searchPaper}>
-              <InputBase
-                id="input-with-icon-textfield"
-                placeholder="Search..."
-                className={classes.searchBoxInput}
-                onChange={handleQueryChange}
-                value={query}
-                onKeyPress={handleQueryEnter}
-                fullWidth
-                endAdornment={
-                    <InputAdornment position="start">
-                        <IconButton disabled={query.length < 3} color="primary" onClick={onSearchClick} aria-label="search">
-                          <SearchIcon />
-                        </IconButton>
-                    </InputAdornment>
-                }/>
+                <Search
+                  query={query}
+                  onQueryChange={handleQueryChange}
+                  onSearchClick={handleSearchClick}
+                />
               </Paper>
           </div>
         </Toolbar>

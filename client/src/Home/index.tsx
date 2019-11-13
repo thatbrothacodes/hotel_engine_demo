@@ -4,10 +4,7 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import Typography from '@material-ui/core/Typography';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import InputBase from '@material-ui/core/InputBase';
-import SearchIcon from '@material-ui/icons/Search';
-import IconButton from '@material-ui/core/IconButton';
+import Search from '../components/Search';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -33,22 +30,16 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 );
 
-function Home(props: RouteComponentProps) {
+export default withRouter((props: RouteComponentProps) => {
     const classes = useStyles();
     const [query, setQuery] = React.useState('');
     
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setQuery(event.target.value);
+    const handleQueryChange = (q: string) => {
+        setQuery(q);
     };
 
-    const onSearchClick = () => {
+    const handleSearchClick = () => {
         props.history.push(`/search?q=${query}`);
-    }
-
-    const handleQueryEnter = (event :React.KeyboardEvent) => {
-        if(event.key.toLowerCase() === 'enter') {
-            onSearchClick();
-        }
     }
 
     return (
@@ -59,24 +50,14 @@ function Home(props: RouteComponentProps) {
                         <GitHubIcon fontSize="large" /> Repository Search
                     </Typography>
                     <Paper className={classes.paper}>
-                        <InputBase
-                            className={classes.searchBoxInput}
-                            value={query}
-                            onChange={handleChange}
-                            onKeyPress={handleQueryEnter}
-                            fullWidth
-                            endAdornment={
-                                <InputAdornment position="start">
-                                    <IconButton disabled={query.length < 3} color="primary" onClick={onSearchClick} aria-label="search">
-                                        <SearchIcon />
-                                    </IconButton>
-                                </InputAdornment>
-                            }/>
+                        <Search
+                            query={query}
+                            onQueryChange={handleQueryChange}
+                            onSearchClick={handleSearchClick}
+                        />
                     </Paper>
                 </Grid>
             </Grid>
         </div>
     )
-}
-
-export default withRouter(Home);
+});
