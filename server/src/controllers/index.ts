@@ -1,7 +1,7 @@
 import repositoriesRouter from './repositories';
 
-export default (router) => {
-    router.use('/repositories', repositoriesRouter());
+export default (router, db) => {
+    router.use('/repositories', repositoriesRouter(db));
     
     return router;
 };

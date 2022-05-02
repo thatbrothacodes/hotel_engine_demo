@@ -19,7 +19,7 @@ declare global {
   }
 }
 
-axios.defaults.baseURL = "http://localhost:4000";
+axios.defaults.baseURL = `${process.env.API_URL}`;
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 const reduxDevTools = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

@@ -17,7 +17,7 @@ import {
     RepositoryActionTypes
 } from './types';
 
-const repoSearchApiUrl :string = 'repositories';
+const repoSearchApiUrl :string = 'http://localhost:4000/repositories';
 
 let currentQuery :string = '';
 let currentOrderBy :string = '';

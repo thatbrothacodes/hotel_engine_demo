@@ -1,10 +1,10 @@
 import express from 'express';
 import redisMiddleware from '../middleware/redis';
 
-export default () => {
+export default (db) => {
     const router = express.Router();
 
-    router.get('/', redisMiddleware, async(req, res, next) => {
+    router.get('/', redisMiddleware(db), async(req, res, next) => {
         try {
             res.status(200).json(res.locals.searchResult);
         } catch(e) {

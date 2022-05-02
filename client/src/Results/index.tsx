@@ -28,7 +28,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Search from '../components/Search';
 
 import { searchRepositories, searchNextRepositories, searchPrevRepositories } from '../actions';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -100,7 +100,7 @@ const useStyles = makeStyles((theme: Theme) =>
       display: 'flex',
       flexDirection: 'column',
       overflowY: 'auto',
-      height: '460px',
+      height: '70vh',
       marginTop: '20px'
     },
     searchBoxInput: {
@@ -160,7 +160,7 @@ type SortOrder =
   "best+match" |
   "stars";
 
-interface IComponentProps extends RouteComponentProps {
+interface IComponentProps {
   repositories: any,
   pages: number,
   total: number,
@@ -174,19 +174,21 @@ const pageSize = 30;
 
 function Results(props: IComponentProps) {
   const classes = useStyles();
+  const location = useLocation();
   const [page, setPage] = React.useState(0);
   const [query, setQuery] = React.useState('');
   const [orderBy, setOrderBy] = React.useState<SortOrder>("best+match");
   const [sortDir, setSortDir] = React.useState<SortDirection>("desc");
   const pageEndIndex = (page + 1) * pageSize;
+  const navigate = useNavigate();
 
   React.useEffect(() => {
-    const params = new URLSearchParams(props.location.search);
+    const params = new URLSearchParams(location.search);
     const queryString = params.get('q') || '';
     
     setQuery(queryString);
     props.searchRepositories(queryString, orderBy, sortDir);
-  },[props.location]);
+  },[location.search]);
 
   const handleChangeSort = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selected :string[] = event.target.value.split(' ');
@@ -204,7 +206,8 @@ function Results(props: IComponentProps) {
     setOrderBy("best+match");
     setSortDir("desc");
     setPage(0);
-    props.history.push(`/search?q=${query}`);
+    
+    navigate(`/search?q=${query}`);
   }
 
   const handleQueryChange = (q: string) => {
@@ -262,7 +265,7 @@ function Results(props: IComponentProps) {
       <main className={classes.content}>
         <div className={classes.toolbar} />
         <Box>
-          <Grid container justify="flex-end">
+          <Grid container justifyContent="flex-end">
             <Select
                 labelId="demo-controlled-open-select-label"
                 id="demo-controlled-open-select"
@@ -347,7 +350,7 @@ function Results(props: IComponentProps) {
               }
             </List>}
             {props.loading &&
-              <Grid className={classes.spinnerContainer} container alignItems="center" justify="center">
+              <Grid className={classes.spinnerContainer} container alignItems="center" justifyContent="center">
                 <CircularProgress size={140} />
               </Grid>
             }
@@ -364,7 +367,7 @@ function Results(props: IComponentProps) {
           nextIconButtonProps={{
               'aria-label': 'next page',
           }}
-          onChangePage={handleChangePage} />
+          onPageChange={handleChangePage} />
       </main>
     </div>
   );
@@ -384,4 +387,4 @@ export default connect(mapStateToProps, {
   searchRepositories,
   searchNextRepositories,
   searchPrevRepositories
-})(withRouter(Results));
+})(Results);

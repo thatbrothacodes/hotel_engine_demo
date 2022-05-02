@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import controllers from './controllers';
 import axios from 'axios';
+import db from './models';
 
 const app = express();
 const router = express.Router();
@@ -9,7 +10,7 @@ const port: number = parseInt(process.env.PORT) || 4000;
 const environment: string = process.env.NODE_ENV || "development";
 
 axios.defaults.baseURL = "https://api.github.com";
-axios.defaults.headers.accept = 'application/vnd.github.mercy-preview+json';
+axios.defaults.headers.common['Accept'] = 'application/vnd.github.mercy-preview+json';
 
 // include error handling
 app.use(bodyParser.json());
@@ -22,9 +23,13 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/', controllers(router));
+app.use('/', controllers(router, db));
 
-app.listen(port, () => {
+db.connect().then(() => {
+  app.listen(port, () => {
     console.log("environment: " + environment);
     console.log(`App listening on port ${port}`);
+  });
 });
+
+
